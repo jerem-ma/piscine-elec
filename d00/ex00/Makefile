@@ -1,5 +1,5 @@
 NAME=program
-F_CPU=1000000
+F_CPU=16000000
 
 CC=avr-gcc
 CFLAGS=-Os -DF_CPU=$(F_CPU) -mmcu=atmega328p
