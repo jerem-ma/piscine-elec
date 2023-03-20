@@ -31,6 +31,7 @@ flash:	$(NAME).hex
 
 clean:
 	rm -rf build/
+	rm -f $(NAME).hex
 
 
 .PHONY: all clean hex flash
