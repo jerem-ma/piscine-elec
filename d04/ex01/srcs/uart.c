@@ -6,7 +6,7 @@
 /*   By: jmaia <jmaia@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/22 13:25:38 by jmaia             #+#    #+#             */
-/*   Updated: 2023/03/22 14:38:39 by jmaia            ###   ###               */
+/*   Updated: 2023/03/22 22:15:05 by jmaia            ###   ###               */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ char	uart_rx(void)
 	return UDR0;
 }
 
-void	uart_print_hex(unsigned char c)
+void	uart_print_hex(uint8_t c)
 {
 	char * const letters = "0123456789ABCDEF";
 

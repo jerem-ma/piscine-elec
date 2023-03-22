@@ -6,7 +6,7 @@
 /*   By: jmaia <jmaia@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/17 12:13:48 by jmaia             #+#    #+#             */
-/*   Updated: 2023/03/22 15:13:55 by jmaia            ###   ###               */
+/*   Updated: 2023/03/22 22:18:10 by jmaia            ###   ###               */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,58 +45,60 @@ int	main(void)
 {
 	uart_init();
 
-	uart_printstr("--Initializing i2c...\n\r");
+//	uart_printstr("--Initializing i2c...\n\r");
 	i2c_init();
 
 	_delay_ms(40);	// Wait for module starting
-	uart_printstr("--Start communication in write mode...\n\r");
-	i2c_stop();
-	i2c_start(I2C_WRITE);
-
-	uart_printstr("--Ask for status...\n\r");
-	i2c_write(0x71);
-
-	uart_printstr("--Start communication in read mode...\n\r");
-	i2c_stop();
-	i2c_start(I2C_READ);
-
-	uart_printstr("--Reading status...\n\r");
+//	uart_printstr("--Start communication in write mode...\n\r");
+//	i2c_start(I2C_WRITE);
+//
+//	uart_printstr("--Ask for status...\n\r");
+//	i2c_write(0x71);
+//
+//	uart_printstr("--Start communication in read mode...\n\r");
+//	i2c_stop();
+//	i2c_start(I2C_READ);
+//
+//	uart_printstr("--Reading status...\n\r");
 	uint8_t	ret;
-	i2c_read(&ret, 0);
-	uart_printstr("Here is status: ");
-	uart_print_hex(ret);
-	uart_printstr("\n\r");
+//	i2c_read(&ret, 0);
+//	uart_printstr("Here is status: ");
+//	uart_print_hex(ret);
+//	uart_printstr("\n\r");
+//	i2c_stop();
 
 	while (1)
 	{
-		uart_printstr("--Start communication in write mode...\n\r");
-		i2c_stop();
+
+//		uart_printstr("--Trigger measurement...\n\r");
 		i2c_start(I2C_WRITE);
-
-		uart_printstr("--Trigger measurement...\n\r");
 		i2c_write(0xAC);
-
-		uart_printstr("--Start communication in read mode...\n\r");
+		i2c_write(0x33);
+		i2c_write(0x00);
 		i2c_stop();
-		i2c_start(I2C_READ);
 
+//		uart_printstr("--Read answer\n\r");
 		do
 		{
-			uart_printstr("Wait for status...\n\r");
 			_delay_ms(80);
-			i2c_read(&ret, 1);
+			i2c_start(I2C_READ);
+			i2c_read(&ret, 0);
+			i2c_stop();
 		} while (ret & (1 << 7));
 
-		uart_printstr("Read data...\n\r");
-		uint8_t	data[6];
+//		uart_printstr("Read data...\n\r");
+		uint8_t	data[7];
 
-		i2c_batch_read(data, 6);
+		i2c_start(I2C_READ);
+		i2c_batch_read(data, 7);
 		for (int i = 0; i < 6; i++)
 		{
 			uart_print_hex(data[i]);
 			uart_tx(' ');
 		}
 		uart_printstr("\n\r");
+		i2c_stop();
+		_delay_ms(1000);
 	}
 }
 
@@ -123,7 +125,7 @@ void i2c_start(enum i2c_mode mode)
 void i2c_stop(void)
 {
 	TWCR = 1 << TWINT | 1 << TWSTO | 1 << TWEN; // Enable TWI and generate start
-	while (!(TWCR & 1 << TWSTO))
+	while (TWCR & 1 << TWSTO)
 		;
 }
 
@@ -131,7 +133,7 @@ void	wait_for_twi_operation()
 {
 	while (!(TWCR & 1 << TWINT))
 		;
-//	print_status();
+	print_status();
 }
 
 int		is_status(uint8_t status)
@@ -188,7 +190,7 @@ void	print_status()
 
 void	i2c_write(uint8_t data)
 {
-	TWDR = TW_WRITE | data << 1;
+	TWDR = data;
 	TWCR = 1 << TWINT | 1 << TWEN;			// Start transmission of data
 	wait_for_twi_operation();
 	if (!is_status(TW_MT_SLA_ACK))			// If it was not ok, do err
