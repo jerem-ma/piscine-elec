@@ -6,7 +6,7 @@
 /*   By: jmaia <jmaia@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/17 12:13:48 by jmaia             #+#    #+#             */
-/*   Updated: 2023/03/22 22:18:10 by jmaia            ###   ###               */
+/*   Updated: 2023/03/22 22:20:09 by jmaia            ###   ###               */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,41 +43,24 @@ void	i2c_write(uint8_t data);
 
 int	main(void)
 {
+	uint8_t	ret;
+
 	uart_init();
 
-//	uart_printstr("--Initializing i2c...\n\r");
 	i2c_init();
 
 	_delay_ms(40);	// Wait for module starting
-//	uart_printstr("--Start communication in write mode...\n\r");
-//	i2c_start(I2C_WRITE);
-//
-//	uart_printstr("--Ask for status...\n\r");
-//	i2c_write(0x71);
-//
-//	uart_printstr("--Start communication in read mode...\n\r");
-//	i2c_stop();
-//	i2c_start(I2C_READ);
-//
-//	uart_printstr("--Reading status...\n\r");
-	uint8_t	ret;
-//	i2c_read(&ret, 0);
-//	uart_printstr("Here is status: ");
-//	uart_print_hex(ret);
-//	uart_printstr("\n\r");
-//	i2c_stop();
-
 	while (1)
 	{
 
-//		uart_printstr("--Trigger measurement...\n\r");
+//		Trigger measurement
 		i2c_start(I2C_WRITE);
 		i2c_write(0xAC);
 		i2c_write(0x33);
 		i2c_write(0x00);
 		i2c_stop();
 
-//		uart_printstr("--Read answer\n\r");
+//		Wait for end of measures
 		do
 		{
 			_delay_ms(80);
@@ -86,18 +69,18 @@ int	main(void)
 			i2c_stop();
 		} while (ret & (1 << 7));
 
-//		uart_printstr("Read data...\n\r");
+//		Read answer
 		uint8_t	data[7];
 
 		i2c_start(I2C_READ);
 		i2c_batch_read(data, 7);
+		i2c_stop();
 		for (int i = 0; i < 6; i++)
 		{
 			uart_print_hex(data[i]);
 			uart_tx(' ');
 		}
 		uart_printstr("\n\r");
-		i2c_stop();
 		_delay_ms(1000);
 	}
 }
@@ -133,7 +116,6 @@ void	wait_for_twi_operation()
 {
 	while (!(TWCR & 1 << TWINT))
 		;
-	print_status();
 }
 
 int		is_status(uint8_t status)
